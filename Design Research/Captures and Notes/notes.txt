@@ -1,0 +1,1 @@
+During idle, the CMS8S5880 transmits state to the RTL8710CF every 2 seconds

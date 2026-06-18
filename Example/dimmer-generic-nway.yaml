@@ -1,0 +1,12 @@
+# NOTE: Run this from the command line with variable substitution like so:
+#   esphome -s simple_name my-dimmer -s name "My Dimmer" -s group "dimmer_group" run dimmer-generic-nway.yaml --device (UART or IP address)
+
+substitutions:  
+  device_name: ${simple_name}
+  friendly_name: ${name}
+  group_name: ${group}
+  icon: mdi:lightbulb-on-70
+
+packages:
+  base: !include base.yaml
+  device: !include devices/tp-link_tapo_500d.yaml

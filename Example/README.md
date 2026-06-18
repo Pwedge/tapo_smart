@@ -1,0 +1,2 @@
+# Overview
+This directory contains a simple example of a stand-alone dimmer switch, as well as an example of two dimmer switches working together on the same wireless network to function as a three-way switch.

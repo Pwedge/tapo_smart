@@ -1,0 +1,234 @@
+# GPIO3 = Main button LED (green) (invert)
+# GPIO4 = Main button LED (red) (invert)
+# GPIO2 = Main button LED (white) (invert)
+# GPIO19 = Main button (invert)
+# GPIO18 = Down button (invert)
+# GPIO17 = Up button (invert)
+# GPIO1 = Reset button
+# GPIO14 = UART TX
+# GPIO13 = UART RX
+
+# GPIO7 =   U3, pin 1
+# GPIO10 =  U3, pin 2
+# GPIO9 =   U3, pin 3
+# GND =     U3, pin 4
+# GPIO11 =  U3, pin 5
+# GPIO8 =   U3, pin 6
+# GPIO12 =  U3, pin 7
+# 3.3V =    U3, pin 8
+
+logger:
+  level: WARN
+  baud_rate: 0
+
+rtl87xx:
+  board: generic-rtl8720cf-2mb-992k
+  framework:
+    # Want to break OTA updates?!  F' around with the keys below and see what happens...
+    version: 0.0.0
+    source: https://github.com/Pwedge/libretiny#rtl8710cf
+
+external_components:
+  - source: /mnt/c/esphome/esphome/esphome/components
+    components: [tapo_smart, uart]
+  - source:
+      type: git
+      url: https://github.com/cossid/tasmotadevicegroupsforesphome
+      ref: 9d780779fe73ef69f8f16402213cb92be71671d4
+    components: [device_groups]
+
+esphome:
+  platformio_options:
+    build_flags: [-DPIN_SERIAL0_RX=13, -DPIN_SERIAL0_TX=14 -DLT_LOGGER=0 -DLT_UART_SILENT_ALL=1]
+
+device_groups:
+  - group_name: ${group_name}
+    send_mask: 0xffffffff
+    receive_mask: 0xffffffff
+    lights:
+      - main_output
+
+# UART used for communication with CMS8S5880
+uart:
+  tx_pin: GPIO14
+  rx_pin: GPIO13
+  parity: NONE
+  stop_bits: 1
+  baud_rate: 115200
+
+output:
+  - platform: tapo_smart
+    id: tapo_dimmer
+    zero_means_zero: true
+
+light:
+  - platform: status_led
+    pin: {number: GPIO4, inverted: true}
+    id: red_led
+    name: Red LED
+    icon: mdi:exclamation-thick
+  - platform: monochromatic
+    id: main_output
+    name: Output
+    output: tapo_dimmer
+    gamma_correct: 1.0
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      then:
+        switch.turn_off: white_led
+    on_turn_off:
+      then:
+        switch.turn_on: white_led
+
+# Buttons
+binary_sensor:
+  - platform: gpio
+    pin: {number: GPIO19, inverted: true}
+    id: button
+    name: Button
+    icon: mdi:gesture-tap-button
+    on_press:
+      then:
+        - light.toggle: main_output
+  - platform: gpio
+    pin: {number: GPIO18, inverted: true}
+    id: brightness_down
+    name: Brightness Down
+    icon: mdi:lightbulb-on-40
+    filters: {autorepeat: {delay: 200ms, time_off: 150ms, time_on: 150ms}}
+    on_press:
+      - if:
+          condition:
+            light.is_on: main_output
+          then:
+            - lambda: !lambda |-
+                auto val = id(main_output).remote_values.get_brightness();
+                val -= 0.16666f;
+                if (val < 0.01f) {
+                  val = 0.01f;
+                }
+                auto call = id(main_output).turn_on();
+                call.set_transition_length(0.0);
+                call.set_brightness(val);
+                call.perform();
+  - platform: gpio
+    pin: {number: GPIO17, inverted: true}
+    id: brightness_up
+    name: Brightness Up
+    icon: mdi:lightbulb-on-80
+    filters: {autorepeat: {delay: 200ms, time_off: 150ms, time_on: 150ms}}
+    on_press:
+      - if:
+          condition:
+            light.is_on: main_output
+          then:
+            - lambda: !lambda |-
+                auto val = id(main_output).remote_values.get_brightness();
+                val += 0.16667f;
+                if (val > 1.0f) {
+                  val = 1.0f;
+                }
+                auto call = id(main_output).turn_on();
+                call.set_transition_length(0.0);
+                call.set_brightness(val);
+                call.perform();
+  - platform: gpio
+    pin: {number: GPIO1}
+    id: reset
+    name: Reset
+    icon: mdi:power-cycle
+    # Using a pad for the unpopulated component at U3 as an optional input for a reed switch-based door sensor (connect series 300Kohm resistor)
+  - platform: gpio
+    pin: {number: GPIO7, mode: {input: true, pullup: true}}
+    id: door_status
+    name: Door Status
+    icon: mdi:door-open
+
+# GPIO output
+switch:
+  - platform: gpio
+    pin: {number: GPIO2, inverted: true}
+    id: white_led
+    name: White LED
+    icon: mdi:led-on
+  - platform: gpio
+    pin: {number: GPIO3, inverted: true}
+    id: green_led
+    name: Green LED
+    icon: mdi:led-on
+    # Using a pad for the unpopulated component at U3 as a double current limited sink for the optional reed switch-based door sensor (connect series 100Kohm resistor)
+  - platform: gpio
+    pin: {number: GPIO11}
+    id: door_status_current_sink
+    internal: true
+
+# Run-time configuration
+number:
+  - platform: template
+    name: Minimum Output
+    id: min_configuration
+    restore_value: true
+    max_value: 100.0
+    min_value: 0.0
+    step: 1.0
+    initial_value: 0.0
+    optimistic: true
+    on_value:
+      then:
+      - output.set_min_power:
+          id: tapo_dimmer
+          min_power: !lambda |-
+             return id(min_configuration).state / 100.0;
+  - platform: template
+    name: Maximum Output
+    id: max_configuration
+    restore_value: true
+    max_value: 100.0
+    min_value: 0.0
+    step: 1.0
+    initial_value: 100.0
+    optimistic: true
+    on_value:
+      then:
+      - output.set_max_power:
+          id: tapo_dimmer
+          max_power: !lambda |-
+             return id(max_configuration).state / 100.0;
+  - platform: template
+    name: Fade Duration
+    id: fade_configuration
+    restore_value: true
+    max_value: 5
+    min_value: 0
+    step: 1
+    initial_value: 1
+    optimistic: true
+    on_value:
+      then:
+        lambda: |-
+            return id(main_output).set_default_transition_length(x * 1000);
+
+# Diagnostic and debug information
+sensor:  
+  - platform: template
+    name: Board Temperature
+    lambda: return id(tapo_dimmer).get_temperature();
+    update_interval: 60s
+    unit_of_measurement: °C
+    entity_category: diagnostic
+    icon: mdi:thermometer
+  - platform: template
+    name: Error Counter
+    lambda: return id(tapo_dimmer).get_errors();
+    update_interval: 60s
+    unit_of_measurement: errors
+    entity_category: diagnostic
+    icon: mdi:counter
+
+text_sensor:
+  - platform: template
+    name: Device Group
+    icon: mdi:lightbulb-group
+    entity_category: diagnostic
+    update_interval: 600s
+    lambda: return {"${group_name}"};
