@@ -408,7 +408,7 @@ namespace esphome {
       
       if (!this->status_has_error() && this->temperature_ > 0 && this->temperature_ < overtemp_encoded) {
         ESP_LOGE(TAG, "Over temperature detected.  Disabling output and setting error state");
-        this->status_set_error("Over temperature condition");
+        this->status_set_error(LOG_STR("Over temperature condition"));
         this->set_dimmer_(0.0);
       } else if (this->status_has_error() && this->temperature_ > overtemp_encoded) {
         ESP_LOGI(TAG, "Over temperature resolved");
