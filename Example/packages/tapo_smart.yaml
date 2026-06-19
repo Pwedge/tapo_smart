@@ -1,3 +1,5 @@
+# TP-Link Tapo S500D
+
 # GPIO3 = Main button LED (green) (invert)
 # GPIO4 = Main button LED (red) (invert)
 # GPIO2 = Main button LED (white) (invert)
@@ -17,36 +19,14 @@
 # GPIO12 =  U3, pin 7
 # 3.3V =    U3, pin 8
 
-logger:
-  level: WARN
-  baud_rate: 0
-
-rtl87xx:
-  board: generic-rtl8720cf-2mb-992k
-  framework:
-    # Want to break OTA updates?!  F' around with the keys below and see what happens...
-    version: 0.0.0
-    source: https://github.com/Pwedge/libretiny#rtl8710cf
-
 external_components:
-  - source: /mnt/c/esphome/esphome/esphome/components
+  - source: github://Pwedge/tapo_smart/esphome/components
     components: [tapo_smart, uart]
-  - source:
-      type: git
-      url: https://github.com/cossid/tasmotadevicegroupsforesphome
-      ref: 9d780779fe73ef69f8f16402213cb92be71671d4
-    components: [device_groups]
+    refresh: 300s
 
 esphome:
   platformio_options:
     build_flags: [-DPIN_SERIAL0_RX=13, -DPIN_SERIAL0_TX=14 -DLT_LOGGER=0 -DLT_UART_SILENT_ALL=1]
-
-device_groups:
-  - group_name: ${group_name}
-    send_mask: 0xffffffff
-    receive_mask: 0xffffffff
-    lights:
-      - main_output
 
 # UART used for communication with CMS8S5880
 uart:
@@ -84,8 +64,8 @@ light:
 binary_sensor:
   - platform: gpio
     pin: {number: GPIO19, inverted: true}
-    id: button
-    name: Button
+    id: main_button
+    name: Main Button
     icon: mdi:gesture-tap-button
     on_press:
       then:
@@ -137,7 +117,7 @@ binary_sensor:
     id: reset
     name: Reset
     icon: mdi:power-cycle
-    # Using a pad for the unpopulated component at U3 as an optional input for a reed switch-based door sensor (connect series 300Kohm resistor)
+    # Using a pad for the unpopulated component at U3 as an optional input for a reed switch-based door sensor
   - platform: gpio
     pin: {number: GPIO7, mode: {input: true, pullup: true}}
     id: door_status
@@ -156,11 +136,6 @@ switch:
     id: green_led
     name: Green LED
     icon: mdi:led-on
-    # Using a pad for the unpopulated component at U3 as a double current limited sink for the optional reed switch-based door sensor (connect series 100Kohm resistor)
-  - platform: gpio
-    pin: {number: GPIO11}
-    id: door_status_current_sink
-    internal: true
 
 # Run-time configuration
 number:
@@ -224,11 +199,3 @@ sensor:
     unit_of_measurement: errors
     entity_category: diagnostic
     icon: mdi:counter
-
-text_sensor:
-  - platform: template
-    name: Device Group
-    icon: mdi:lightbulb-group
-    entity_category: diagnostic
-    update_interval: 600s
-    lambda: return {"${group_name}"};

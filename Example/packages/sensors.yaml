@@ -1,0 +1,29 @@
+# Add standard sensors
+sensor:
+  # WiFi Signal sensor
+  - platform: wifi_signal
+    id: wifi_signal_sensor
+    name: WiFi Signal
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: percent
+  # Uptime sensor
+  - platform: uptime
+    id: uptime_counter_sensor
+    name: Uptime
+  # Internal temperature
+  - platform: internal_temperature
+    id: internal_temperature_sensor
+    name: Internal Temperature
+
+text_sensor:
+  # Expose ESPHome version as sensor
+  - platform: version
+    name: ESPHome Version
+  # Expose WiFi information as sensors
+  - platform: wifi_info
+    id: wifi_info_sensor
+    ip_address:
+      name: IP
+    ssid:
+      name: SSID

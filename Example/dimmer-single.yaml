@@ -1,14 +1,14 @@
-# NOTE: Run this from the command line with variable substitution like so:
-#   esphome -s simple_name my-dimmer -s name "My Dimmer" run config/dimmer-generic.yaml --device (UART or IP address)
-
-substitutions:  
-  device_name: ${simple_name}
-  friendly_name: ${name}
+substitutions:
+  name: dimmer-single
+  friendly_name: Single Dimmer
   icon: mdi:lightbulb-on-70
 
 packages:
-  base: !include base.yaml
-  device: !include devices/tp-link_tapo_500d.yaml
+  common: !include packages/common.yaml
+  web_server: !include packages/web_server.yaml
+  sensors: !include packages/sensors.yaml
+  rtl8710cf: !include packages/rtl8710cf.yaml
+  tapo_smart: !include packages/tapo_smart.yaml
 
-device_groups: !remove
-text_sensor: !remove
+sensor:
+  - id: !remove internal_temperature_sensor
