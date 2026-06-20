@@ -11,4 +11,35 @@ As with any project, there were some bumps along the way.  I'll try to keep this
 # Known Issues
 ###
 - Very infrequently (~once every few weeks), the UART communication between the two microcontrollers breaks down.  This appears to be an issue with LibreTiny.  As a workaround, the firmware detects this condition and automatically reboots the offending microcontroller
-- Dimming is not always perfectly smooth.  The dimming is implemented in software, and it appears that sometimes and interrupt occurs that interrupts what should be a smoot transition
+- Dimming is not always perfectly smooth.  The dimming is implemented in software, and it appears that sometimes an interrupt occurs that interrupts what should be a smooth transition
+
+# Usage
+Firstly, have a look at the [Programming](Programming/README.md) directory to understand what is required in order to access and re-program the board.  After that, clone the [Example](Example/README.md) directory and compile/upload one of the examples, like so:
+
+```
+mkdir tp-link-tapo
+cd tp-link-tapo
+
+python3 -m venv venv
+source venv/bin/activate
+
+python3 -m pip install --upgrade pip
+pip install esphome
+
+git clone -n --depth=1 --filter=tree:0 https://github.com/Pwedge/tapo_smart.git
+cd tapo_smart
+git sparse-checkout set --no-cone /Example
+git checkout
+cd Example
+
+cp packages/secrets.yaml.template packages/secrets.yaml
+(edit packages/secrets.yaml to suite your environment and save the file)
+
+esphome compile dimmer-single.yaml
+esphome upload dimmer-single.yaml --device /dev/ttyUSB0
+
+(power cycle or hard-reset the device using the "Restart" button on front of the switch)
+(switch should be functional and ready to be updated over the air in the future)
+```
+
+After the upload, power cycle or hard-reset the device using the "Restart" button on front of the switch.  The switch should now be running ESPHome-based firmware.  It will have the ability to function as a proper dimmer, allow configuration of the minimum and maximum dimming values, and it will be ready to be updated over the air in the future.
