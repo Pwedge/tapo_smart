@@ -37,9 +37,6 @@ cp packages/secrets.yaml.template packages/secrets.yaml
 
 esphome compile dimmer-single.yaml
 esphome upload dimmer-single.yaml --device /dev/ttyUSB0
-
-(power cycle or hard-reset the device using the "Restart" button on front of the switch)
-(switch should be functional and ready to be updated over the air in the future)
 ```
 
 After the upload, power cycle or hard-reset the device using the "Restart" button on front of the switch.  The switch should now be running ESPHome-based firmware.  It will have the ability to function as a proper dimmer, allow configuration of the minimum and maximum dimming values, and it will be ready to be updated over the air in the future.

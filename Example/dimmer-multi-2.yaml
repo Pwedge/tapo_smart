@@ -14,3 +14,7 @@ packages:
 
 sensor:
   - id: !remove internal_temperature_sensor
+
+esphome:
+    name_add_mac_suffix: true
+
