@@ -1,0 +1,16 @@
+substitutions:
+  name: dimmer-multi-2
+  friendly_name: Multi Dimmer 2
+  group_name: multi-dimmer
+  icon: mdi:lightbulb-on-70
+
+packages:
+  common: !include packages/common.yaml
+  web_server: !include packages/web_server.yaml
+  sensors: !include packages/sensors.yaml
+  rtl8710cf: !include packages/rtl8710cf.yaml
+  tapo_smart: !include packages/tapo_smart.yaml
+  device_group: !include packages/device_group.yaml
+
+sensor:
+  - id: !remove internal_temperature_sensor

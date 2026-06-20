@@ -1,0 +1,19 @@
+external_components:
+  - source: github://cossid/tasmotadevicegroupsforesphome
+    components: [device_groups]
+    refresh: 300s
+
+device_groups:
+  - group_name: ${group_name}
+    send_mask: 0xffffffff
+    receive_mask: 0xffffffff
+    lights:
+      - main_output
+
+text_sensor:
+  - platform: template
+    name: Device Group
+    icon: mdi:lightbulb-group
+    entity_category: diagnostic
+    update_interval: 600s
+    lambda: return {"${group_name}"};
