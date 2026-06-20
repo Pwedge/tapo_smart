@@ -14,7 +14,7 @@ As with any project, there were some bumps along the way.  I'll try to keep this
 - Dimming is not always perfectly smooth.  The dimming is implemented in software, and it appears that sometimes an interrupt occurs that interrupts what should be a smooth transition
 
 # Usage
-Firstly, have a look at the [Programming](Programming/README.md) directory to understand what is required in order to access and re-program the board.  After that, clone the [Example](Example/README.md) directory and compile/upload one of the examples, like so:
+Firstly, have a look at the [Programming](Programming/README.md) directory to understand what is required in order to access and re-program the board.  After that, clone the [Example](Example/) directory and compile/upload one of the examples, like so:
 
 ```
 mkdir tp-link-tapo
