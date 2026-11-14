@@ -1,3 +1,5 @@
 rtl87xx:
   board: generic-rtl8720cf-2mb-992k
+  framework:
+    version: 1.14.0
 

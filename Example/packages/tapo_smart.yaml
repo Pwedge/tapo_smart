@@ -21,7 +21,7 @@
 
 external_components:
   - source: github://Pwedge/tapo_smart/esphome/components
-    components: [tapo_smart, uart]
+    components: [tapo_smart]
     refresh: 300s
 
 esphome:
@@ -188,14 +188,14 @@ sensor:
   - platform: template
     name: Board Temperature
     lambda: return id(tapo_dimmer).get_temperature();
-    update_interval: 60s
+    update_interval: 5s
     unit_of_measurement: °C
     entity_category: diagnostic
     icon: mdi:thermometer
   - platform: template
     name: Error Counter
     lambda: return id(tapo_dimmer).get_errors();
-    update_interval: 60s
+    update_interval: 5s
     unit_of_measurement: errors
     entity_category: diagnostic
     icon: mdi:counter
