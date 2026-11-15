@@ -59,6 +59,7 @@ namespace esphome {
         float dimmer_val_handled_{0.0};
         uint16_t temperature_{0};
         uint8_t error_count_{0};
+        HighFrequencyLoopRequester high_freq_;
     };
   }  // namespace tapo_smart
 }  // namespace esphome

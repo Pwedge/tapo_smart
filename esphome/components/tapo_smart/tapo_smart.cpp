@@ -293,7 +293,7 @@ namespace esphome {
       this->flush_rx_(0);
       
       /* Check for broadcast announce from CMS */
-      err_val = this->message_rx_(rx_msg, 14, 100);
+      err_val = this->message_rx_(rx_msg, 14, 1000);
       if (err_val == timeout) {
         ESP_LOGV(TAG, "Possible reboot of RTL.  CMS may already be initialized.  Checking for a status response");
         uint8_t tx_msg[] = {0x5a, 0x5a, 0x00, 0x0a, 0x00, 0x04, 0x01, 0x00, 0x00, 0x00, 0x37, 0x1a};
@@ -390,6 +390,7 @@ namespace esphome {
       const uint32_t  overtemp_encoded = 4635;  /* Roughly 95C.  Temperature has an inverse relationship, so any value below this is too hot */
       
       uint32_t        poll_ts;
+      bool            at_target;
       
       if (!this->init_complete_) {
         return;
@@ -397,7 +398,15 @@ namespace esphome {
       
       poll_ts = millis();
       
-      if (!this->status_has_error() && this->dimmer_val_target_ != this->dimmer_val_handled_) {
+      at_target = this->dimmer_val_target_ == this->dimmer_val_handled_;
+      
+      if (at_target) {
+        this->high_freq_.stop();
+      } else {
+        this->high_freq_.start();
+      }
+      
+      if (!this->status_has_error() && !at_target) {
         ESP_LOGV(TAG, "Dimmer values don't match.  Setting new target dimmer value");
         this->set_dimmer_(this->dimmer_val_target_);
       } else if (poll_ts > status_poll_ms + this->status_ts_prev_) {
