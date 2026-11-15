@@ -117,12 +117,12 @@ binary_sensor:
     id: reset
     name: Reset
     icon: mdi:power-cycle
-    # Using a pad for the unpopulated component at U3 as an optional input for a reed switch-based door sensor
-  - platform: gpio
-    pin: {number: GPIO7, mode: {input: true, pullup: true}}
-    id: door_status
-    name: Door Status
-    icon: mdi:door-open
+ # Using a pad for the unpopulated component at U3 as an optional input for a reed switch-based door sensor
+ # - platform: gpio
+ #   pin: {number: GPIO7, mode: {input: true, pullup: true}}
+ #   id: door_status
+ #   name: Door Status
+ #   icon: mdi:door-open
 
 # GPIO output
 switch:
